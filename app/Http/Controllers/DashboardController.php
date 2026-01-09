@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Service;
+use App\Models\Order;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,8 +19,8 @@ class DashboardController extends Controller
         // Total Products (active services)
         $totalProducts = Service::where('is_active', 1)->count();
 
-        // Total Orders (transactions count)
-        $totalOrders = Transaction::count();
+        // Total Orders (from orders table)
+        $totalOrders = Order::count();
 
         // Revenue (sum of amount)
         // Revenue (sum of amount)
