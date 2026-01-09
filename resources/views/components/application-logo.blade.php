@@ -1,0 +1,1 @@
+<img src="{{ asset('image/dyanaf-logo-circle.png') }}" alt="Dyanaf Logo" {{ $attributes->merge(['class' => 'w-10 h-10']) }}>
