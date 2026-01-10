@@ -30,6 +30,21 @@ class LoginRequest extends FormRequest
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'captcha_answer' => ['required', 'integer'],
+            'user_latitude' => ['required', 'numeric'],
+            'user_longitude' => ['required', 'numeric'],
+        ];
+    }
+
+    /**
+     * Get custom error messages for validation rules.
+     */
+    public function messages(): array
+    {
+        return [
+            'user_latitude.required' => 'Akses lokasi diperlukan untuk login. Silakan izinkan akses lokasi di browser.',
+            'user_longitude.required' => 'Akses lokasi diperlukan untuk login. Silakan izinkan akses lokasi di browser.',
+            'user_latitude.numeric' => 'Data lokasi tidak valid.',
+            'user_longitude.numeric' => 'Data lokasi tidak valid.',
         ];
     }
 
@@ -42,7 +57,17 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Validate CAPTCHA first
+        // Validate location is provided (server-side security check)
+        $latitude = $this->input('user_latitude');
+        $longitude = $this->input('user_longitude');
+
+        if (empty($latitude) || empty($longitude)) {
+            throw ValidationException::withMessages([
+                'email' => 'Akses lokasi diperlukan untuk login. Silakan izinkan akses lokasi di browser.',
+            ]);
+        }
+
+        // Validate CAPTCHA
         $expectedAnswer = session('captcha_answer');
         $userAnswer = (int) $this->input('captcha_answer');
 
