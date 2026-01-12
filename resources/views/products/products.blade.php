@@ -4,13 +4,14 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Products') }}
             </h2>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <div class="relative">
+            <div class="flex gap-3">
+                <!-- Search only visible on desktop -->
+                <div class="relative hidden sm:block">
                     <input type="text"
-                        id="search-input"
+                        id="search-input-desktop"
                         value="{{ request('search') }}"
                         placeholder="Search products..."
-                        class="w-full sm:w-64 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10">
+                        class="w-64 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
@@ -33,17 +34,32 @@
 
             <!-- Content for AJAX Replacement -->
             <div id="products-content">
+
+                <!-- Mobile Search (inside content area) -->
+                <div class="sm:hidden mb-3">
+                    <div class="relative">
+                        <input type="text"
+                            id="search-input-mobile"
+                            value="{{ request('search') }}"
+                            placeholder="Search products..."
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Mobile Card View -->
                 <div class="sm:hidden space-y-3">
                     @forelse($products as $product)
-                    <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="bg-white rounded-lg border border-gray-200 p-3">
                         <div class="flex items-start justify-between mb-3">
                             <div class="flex items-center">
-                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                     @if($product->icon)
-                                    <i class="{{ $product->icon }} text-xl text-gray-600"></i>
+                                    <i class="{{ $product->icon }} text-lg text-gray-600"></i>
                                     @else
-                                    <i class="fas fa-box text-xl text-gray-400"></i>
+                                    <i class="fas fa-box text-lg text-gray-400"></i>
                                     @endif
                                 </div>
                                 <div class="ml-3">
@@ -99,15 +115,15 @@
                         </div>
                     </div>
                     @empty
-                    <div class="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
-                        <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
-                        <p class="mt-2">No products found</p>
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
+                        <i class="fas fa-inbox text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-sm">No products found</p>
                     </div>
                     @endforelse
                 </div>
 
                 <!-- Desktop Table View -->
-                <div class="hidden sm:block bg-white overflow-hidden shadow-sm rounded-lg">
+                <div class="hidden sm:block bg-white overflow-hidden border border-gray-200 rounded-lg">
                     <div class="p-6">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -203,15 +219,14 @@
 
     <script>
         let searchTimeout;
-        const searchInput = document.getElementById('search-input');
+        const searchInputDesktop = document.getElementById('search-input-desktop');
+        const searchInputMobile = document.getElementById('search-input-mobile');
         const contentDiv = document.getElementById('products-content');
 
-        searchInput.addEventListener('input', function() {
+        function handleSearch(query) {
             clearTimeout(searchTimeout);
-            const query = this.value;
 
             searchTimeout = setTimeout(() => {
-                // Update URL without reloading
                 const url = new URL(window.location.href);
                 if (query) {
                     url.searchParams.set('search', query);
@@ -220,8 +235,7 @@
                 }
                 window.history.pushState({}, '', url);
 
-                // Fetch new content
-                NProgress.start();
+                if (typeof NProgress !== 'undefined') NProgress.start();
                 fetch(url, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
@@ -237,8 +251,28 @@
                         }
                     })
                     .catch(error => console.error('Error:', error))
-                    .finally(() => NProgress.done());
-            }, 500); // Debounce 500ms
-        });
+                    .finally(() => {
+                        if (typeof NProgress !== 'undefined') NProgress.done();
+                    });
+            }, 500);
+        }
+
+        function syncInputs(source, target) {
+            if (target) target.value = source.value;
+        }
+
+        if (searchInputDesktop) {
+            searchInputDesktop.addEventListener('input', function() {
+                handleSearch(this.value);
+                syncInputs(this, searchInputMobile);
+            });
+        }
+
+        if (searchInputMobile) {
+            searchInputMobile.addEventListener('input', function() {
+                handleSearch(this.value);
+                syncInputs(this, searchInputDesktop);
+            });
+        }
     </script>
 </x-app-layout>

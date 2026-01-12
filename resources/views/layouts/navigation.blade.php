@@ -1,16 +1,26 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+        <div class="flex justify-between h-14 sm:h-16">
+            <div class="flex items-center min-w-0">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <x-application-logo class="block h-8 sm:h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Page Title (next to logo) -->
+                @isset($pageTitle)
+                <div class="ml-3 sm:ml-4 min-w-0 flex items-center">
+                    <span class="text-gray-300 mr-2 sm:mr-3">|</span>
+                    <div class="min-w-0">
+                        {{ $pageTitle }}
+                    </div>
+                </div>
+                @endisset
+
+                <!-- Navigation Links (Desktop) -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
@@ -23,8 +33,6 @@
                 <!-- Chat Icon (Desktop) -->
                 <a href="{{ route('chat.index') }}" class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out mr-4 relative">
                     <i class="fas fa-comment-dots text-lg"></i>
-                    <!-- Notification Badge (Optional) -->
-                    <!-- <span class="absolute top-1 right-1 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span> -->
                 </a>
 
                 <x-dropdown align="right" width="48">

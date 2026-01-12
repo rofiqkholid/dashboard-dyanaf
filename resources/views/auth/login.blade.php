@@ -27,26 +27,11 @@
         </div>
 
         <div class="w-full sm:max-w-md mt-4 sm:mt-8 px-4 sm:px-6 py-6 sm:py-8 bg-white shadow-lg overflow-hidden rounded-xl">
-            <!-- Location Status Badge -->
-            <div id="location-badge" class="mb-4 p-2 bg-red-50 border border-red-200 rounded-lg text-sm cursor-pointer" onclick="window.requestLocationAgain && window.requestLocationAgain()">
-                <div class="flex items-center gap-2">
-                    <svg id="location-icon" class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span id="location-text" class="flex-1 text-red-700">Lokasi belum diizinkan</span>
-                </div>
-                <p id="location-hint" class="hidden text-xs text-red-500 mt-1 pl-6">Klik ikon gembok di address bar → Site settings → Location → Allow</p>
-            </div>
-
             <!-- Session Status -->
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
             <form id="login-form" method="POST" action="{{ route('login') }}">
                 @csrf
-
-                <!-- Hidden field for location -->
-                <input type="hidden" name="user_latitude" id="user_latitude" value="">
-                <input type="hidden" name="user_longitude" id="user_longitude" value="">
 
                 <!-- Email Address -->
                 <div>
@@ -111,7 +96,7 @@
                 </div>
 
                 <div class="flex flex-col items-center mt-6 space-y-4">
-                    <x-primary-button id="login-btn" class="w-full justify-center py-3 text-lg opacity-50 cursor-not-allowed" disabled>
+                    <x-primary-button id="login-btn" class="w-full justify-center py-3 text-lg">
                         {{ __('Log in') }}
                     </x-primary-button>
 
@@ -144,127 +129,6 @@
                     this.style.borderColor = '#ef4444';
                 }
             });
-
-            // Geolocation handling
-            const locationBadge = document.getElementById('location-badge');
-            const locationIcon = document.getElementById('location-icon');
-            const locationText = document.getElementById('location-text');
-            const locationHint = document.getElementById('location-hint');
-            const loginBtn = document.getElementById('login-btn');
-            const latInput = document.getElementById('user_latitude');
-            const lngInput = document.getElementById('user_longitude');
-
-            function enableLogin(lat, lng) {
-                latInput.value = lat;
-                lngInput.value = lng;
-                loginBtn.disabled = false;
-                loginBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                locationBadge.classList.remove('cursor-pointer');
-
-                locationBadge.classList.remove('bg-red-50', 'border-red-200');
-                locationBadge.classList.add('bg-green-50', 'border-green-200');
-                locationIcon.classList.remove('text-red-500');
-                locationIcon.classList.add('text-green-500');
-                locationText.classList.remove('text-red-700');
-                locationText.classList.add('text-green-700');
-                locationText.textContent = 'Lokasi diizinkan';
-                locationHint.classList.add('hidden');
-            }
-
-            function disableLogin(message, showHint = false) {
-                loginBtn.disabled = true;
-                loginBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-                locationBadge.classList.remove('bg-green-50', 'border-green-200');
-                locationBadge.classList.add('bg-red-50', 'border-red-200');
-                locationIcon.classList.remove('text-green-500');
-                locationIcon.classList.add('text-red-500');
-                locationText.classList.remove('text-green-700');
-                locationText.classList.add('text-red-700');
-                locationText.textContent = message || 'Lokasi belum diizinkan';
-
-                if (showHint) {
-                    locationHint.classList.remove('hidden');
-                } else {
-                    locationHint.classList.add('hidden');
-                }
-            }
-
-            function requestLocation() {
-                if (!navigator.geolocation) {
-                    disableLogin('Browser tidak mendukung lokasi');
-                    return;
-                }
-
-                // Check permission state first
-                if (navigator.permissions) {
-                    navigator.permissions.query({
-                        name: 'geolocation'
-                    }).then(function(result) {
-                        if (result.state === 'denied') {
-                            // Permission was denied, show instructions
-                            disableLogin('Lokasi diblokir - lihat petunjuk di bawah', true);
-                        } else {
-                            // Permission is prompt or granted, request location
-                            doRequestLocation();
-                        }
-                    }).catch(function() {
-                        doRequestLocation();
-                    });
-                } else {
-                    doRequestLocation();
-                }
-            }
-
-            function doRequestLocation() {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        enableLogin(position.coords.latitude, position.coords.longitude);
-                    },
-                    function(error) {
-                        switch (error.code) {
-                            case error.PERMISSION_DENIED:
-                                disableLogin('Lokasi diblokir - lihat petunjuk di bawah', true);
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                disableLogin('Lokasi tidak tersedia');
-                                break;
-                            case error.TIMEOUT:
-                                disableLogin('Waktu permintaan habis - klik untuk coba lagi');
-                                break;
-                            default:
-                                disableLogin('Gagal mendapatkan lokasi');
-                        }
-                    }, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            }
-
-            // Expose function globally for onclick
-            window.requestLocationAgain = requestLocation;
-
-            // Auto-request location on page load
-            requestLocation();
-
-            // Watch for permission changes
-            if (navigator.permissions) {
-                navigator.permissions.query({
-                    name: 'geolocation'
-                }).then(function(result) {
-                    result.onchange = function() {
-                        if (result.state === 'granted') {
-                            requestLocation();
-                        } else if (result.state === 'denied') {
-                            disableLogin('Lokasi diblokir - lihat petunjuk di bawah', true);
-                        } else {
-                            disableLogin('Lokasi belum diizinkan');
-                        }
-                    };
-                });
-            }
         });
     </script>
 </body>

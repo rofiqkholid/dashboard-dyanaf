@@ -4,12 +4,13 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Orders') }}
             </h2>
-            <div class="relative">
+            <!-- Search only visible on desktop -->
+            <div class="relative hidden sm:block">
                 <input type="text"
-                    id="search-input"
+                    id="search-input-desktop"
                     value="{{ request('search') }}"
                     placeholder="Search orders..."
-                    class="w-full sm:w-64 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10">
+                    class="w-64 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
@@ -22,6 +23,21 @@
 
             <!-- Content for AJAX Replacement -->
             <div id="orders-content">
+
+                <!-- Mobile Search (inside content area) -->
+                <div class="sm:hidden mb-3">
+                    <div class="relative">
+                        <input type="text"
+                            id="search-input-mobile"
+                            value="{{ request('search') }}"
+                            placeholder="Search orders..."
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Mobile Card View -->
                 <div class="sm:hidden space-y-3">
                     @forelse($orders as $order)
@@ -127,12 +143,12 @@
 
     <script>
         let searchTimeout;
-        const searchInput = document.getElementById('search-input');
+        const searchInputDesktop = document.getElementById('search-input-desktop');
+        const searchInputMobile = document.getElementById('search-input-mobile');
         const contentDiv = document.getElementById('orders-content');
 
-        searchInput.addEventListener('input', function() {
+        function handleSearch(query) {
             clearTimeout(searchTimeout);
-            const query = this.value;
 
             searchTimeout = setTimeout(() => {
                 // Update URL without reloading
@@ -164,7 +180,26 @@
                     .finally(() => {
                         if (typeof NProgress !== 'undefined') NProgress.done();
                     });
-            }, 500); // Debounce 500ms
-        });
+            }, 500);
+        }
+
+        // Sync both inputs
+        function syncInputs(source, target) {
+            if (target) target.value = source.value;
+        }
+
+        if (searchInputDesktop) {
+            searchInputDesktop.addEventListener('input', function() {
+                handleSearch(this.value);
+                syncInputs(this, searchInputMobile);
+            });
+        }
+
+        if (searchInputMobile) {
+            searchInputMobile.addEventListener('input', function() {
+                handleSearch(this.value);
+                syncInputs(this, searchInputDesktop);
+            });
+        }
     </script>
 </x-app-layout>
