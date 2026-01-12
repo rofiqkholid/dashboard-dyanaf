@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Products') }}
             </h2>
-            <div class="flex gap-3">
-                <!-- Search only visible on desktop -->
-                <div class="relative hidden sm:block">
+            <!-- Desktop only: Search + Add button -->
+            <div class="hidden sm:flex items-center gap-3">
+                <div class="relative">
                     <input type="text"
                         id="search-input-desktop"
                         value="{{ request('search') }}"
@@ -35,9 +35,9 @@
             <!-- Content for AJAX Replacement -->
             <div id="products-content">
 
-                <!-- Mobile Search (inside content area) -->
-                <div class="sm:hidden mb-3">
-                    <div class="relative">
+                <!-- Mobile: Search + Add Button (inside content area) -->
+                <div class="sm:hidden mb-3 flex gap-2">
+                    <div class="relative flex-1">
                         <input type="text"
                             id="search-input-mobile"
                             value="{{ request('search') }}"
@@ -47,6 +47,9 @@
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                     </div>
+                    <a href="{{ route('products.create') }}" class="inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition flex-shrink-0">
+                        <i class="fas fa-plus"></i>
+                    </a>
                 </div>
 
                 <!-- Mobile Card View -->
