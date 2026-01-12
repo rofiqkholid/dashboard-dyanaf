@@ -84,7 +84,7 @@
                             <i class="fas fa-plus-circle text-xl sm:text-2xl text-gray-600 mb-1 sm:mb-2"></i>
                             <span class="text-xs sm:text-sm text-gray-700 text-center">Add Product</span>
                         </a>
-                        <a href="#" class="flex flex-col items-center p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition">
+                        <a href="{{ route('orders.index') }}" class="flex flex-col items-center p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition">
                             <i class="fas fa-clipboard-list text-xl sm:text-2xl text-gray-600 mb-1 sm:mb-2"></i>
                             <span class="text-xs sm:text-sm text-gray-700 text-center">View Orders</span>
                         </a>
@@ -105,7 +105,7 @@
                 <!-- Orders Chart -->
                 <div class="bg-white overflow-hidden border border-gray-200 rounded-lg p-4 sm:p-6">
                     <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Orders per Month</h3>
-                    <div class="relative h-64 w-full">
+                    <div class="relative h-48 sm:h-64 w-full">
                         <canvas id="ordersChart"></canvas>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                 <!-- Revenue Chart -->
                 <div class="bg-white overflow-hidden border border-gray-200 rounded-lg p-4 sm:p-6">
                     <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Revenue per Month</h3>
-                    <div class="relative h-64 w-full">
+                    <div class="relative h-48 sm:h-64 w-full">
                         <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
@@ -141,6 +141,9 @@
                 const fullMonths = JSON.parse(dataEl.dataset.fullMonths);
                 const ordersData = JSON.parse(dataEl.dataset.orders);
                 const revenueData = JSON.parse(dataEl.dataset.revenue);
+
+                // Set Global Chart Font
+                Chart.defaults.font.family = "'Outfit', sans-serif";
 
                 // Handle Responsive Labels (Numbers on Mobile, Short Name on Desktop)
                 const isMobile = window.innerWidth < 640;
@@ -242,12 +245,12 @@
                         datasets: [{
                             label: 'Revenue',
                             data: revenueData,
-                            borderColor: '#a855f7', // purple-500
-                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            borderColor: '#22c55e', // green-500
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
                             borderWidth: 2,
                             fill: false,
                             tension: 0.4,
-                            pointBackgroundColor: '#a855f7'
+                            pointBackgroundColor: '#22c55e'
                         }]
                     },
                     options: revenueOptions

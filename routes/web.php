@@ -40,6 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/messages/{room?}', [ChatController::class, 'getMessages'])->name('chat.messages');
+
+    // Orders
+    Route::resource('orders', \App\Http\Controllers\OrderController::class)->only(['index', 'show']);
 });
 
 require __DIR__ . '/auth.php';
